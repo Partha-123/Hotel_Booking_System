@@ -1,0 +1,179 @@
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+public class HotelBooking {
+    static Scanner scanner = new Scanner(System.in);
+    static int savedPin = 1234;
+    static int bookingIdCounter = 1000;
+    static List<String> bookings = new ArrayList<>();  // List to store booking details
+
+    public static void main(String[] args) {
+        while (true) {
+            System.out.println("\n=== Welcome to HotelEase ===");
+            System.out.println("1. Book a Room");
+            System.out.println("2. Cancel Booking");
+            System.out.println("3. View My Bookings");
+            System.out.println("4. View Available Rooms");
+            System.out.println("5. Reset PIN");
+            System.out.println("0. Exit");
+            System.out.print("Enter your choice: ");
+
+            int choice;
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (Exception e) {
+                System.out.println("Invalid input. Try again.");
+                continue;
+            }
+
+            switch (choice) {
+                case 0:
+                    System.out.println("Thank you for using HotelEase!");
+                    System.exit(0);
+
+                case 1:
+                    bookRoom();
+                    break;
+
+                case 2:
+                    cancelBooking();
+                    break;
+
+                case 3:
+                    viewMyBookings();
+                    break;
+
+                case 4:
+                    viewAvailableRooms();
+                    break;
+
+                case 5:
+                    resetPin();
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Try again.");
+            }
+        }
+    }
+
+    static void bookRoom() {
+        System.out.println("\n--- Room Booking ---");
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+
+        System.out.println("Room Types: 1. Single (Tk 2000)  2. Double (Tk 3500)  3. Suite (Tk 5000)");
+        System.out.print("Choose room type (1-3): ");
+        int roomTypeChoice = Integer.parseInt(scanner.nextLine());
+
+        String roomType;
+        double price;
+        switch (roomTypeChoice) {
+            case 1:
+                roomType = "Single";
+                price = 2000;
+                break;
+            case 2:
+                roomType = "Double";
+                price = 3500;
+                break;
+            case 3:
+                roomType = "Suite";
+                price = 5000;
+                break;
+            default:
+                System.out.println("Invalid room type.");
+                return;
+        }
+
+        System.out.print("Enter number of nights: ");
+        int nights = Integer.parseInt(scanner.nextLine());
+        double totalCost = price * nights;
+
+        System.out.print("Enter your PIN to confirm: ");
+        int pin = Integer.parseInt(scanner.nextLine());
+
+        if (pin == savedPin) {
+            String date = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+            int bookingId = bookingIdCounter++;
+
+            String bookingDetails = String.format("ID:%d | %s | %s | Nights: %d | Tk %.2f | %s",
+                    bookingId, name, roomType, nights, totalCost, date);
+            bookings.add(bookingDetails);
+
+            System.out.printf("Booking Confirmed! ID: %d | Room: %s | Total: Tk %.2f%n", bookingId, roomType, totalCost);
+        } else {
+            System.out.println("Incorrect PIN.");
+        }
+    }
+
+    static void cancelBooking() {
+        System.out.println("\n--- Cancel Booking ---");
+        System.out.print("Enter your Booking ID: ");
+        String bookingIdInput = scanner.nextLine();
+
+        System.out.print("Enter your PIN: ");
+        int pin = Integer.parseInt(scanner.nextLine());
+
+        if (pin != savedPin) {
+            System.out.println("Incorrect PIN.");
+            return;
+        }
+
+        boolean found = false;
+        Iterator<String> iterator = bookings.iterator();
+        while (iterator.hasNext()) {
+            String booking = iterator.next();
+            if (booking.contains("ID:" + bookingIdInput)) {
+                iterator.remove();
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            System.out.println("Booking ID " + bookingIdInput + " cancelled successfully.");
+        } else {
+            System.out.println("Booking ID not found.");
+        }
+    }
+
+    static void viewMyBookings() {
+        System.out.println("\n--- Your Bookings ---");
+        if (bookings.isEmpty()) {
+            System.out.println("No bookings found.");
+        } else {
+            bookings.stream().skip(Math.max(0, bookings.size() - 5)).forEach(System.out::println);
+        }
+    }
+
+    static void viewAvailableRooms() {
+        System.out.println("\n--- Available Rooms ---");
+        System.out.println("Single Rooms: 15");
+        System.out.println("Double Rooms: 10");
+        System.out.println("Suites      : 5");
+        System.out.println("Note: Availability is not tracked dynamically yet.");
+    }
+
+    static void resetPin() {
+        System.out.println("\n--- Reset PIN ---");
+        System.out.print("Enter current PIN: ");
+        int currentPin = Integer.parseInt(scanner.nextLine());
+
+        if (currentPin == savedPin) {
+            System.out.print("Enter new PIN: ");
+            int newPin = Integer.parseInt(scanner.nextLine());
+            System.out.print("Confirm new PIN: ");
+            int confirmPin = Integer.parseInt(scanner.nextLine());
+
+            if (newPin == confirmPin) {
+                savedPin = newPin;
+                System.out.println("PIN reset successfully.");
+            } else {
+                System.out.println("PINs do not match.");
+            }
+        } else {
+            System.out.println("Incorrect current PIN.");
+        }
+    }
+}
